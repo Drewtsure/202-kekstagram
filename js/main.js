@@ -1,9 +1,17 @@
 'use strict';
 
-var FOTOS_QUANTITY = 25;
-var LIKES = {
+var PHOTOS_QUANTITY = 25;
+var LIKES_QUANTITY = {
   min: 15,
   max: 200
+};
+var FILES_URL = {
+  img: 'img/avatar-',
+  photo: 'photos/'
+};
+var FILES_TYPE = {
+  jpg: '.jpg',
+  svg: '.svg'
 };
 var COMMENTS = {
   max: 4,
@@ -23,7 +31,7 @@ var getRandomComments = function (quantity) {
   var comment = [];
   for (var i = 0; i < quantity; i++) {
     comment[i] = {
-      avatar: 'img/avatar-' + getRamdomValue(1, COMMENTS.avatars) + '.svg',
+      avatar: FILES_URL.img + getRamdomValue(1, COMMENTS.avatars) + FILES_TYPE.svg,
       message: COMMENTS.list[getRamdomValue(0, COMMENTS.list.length)],
       name: COMMENTS.names[getRamdomValue(0, COMMENTS.names.length)]
     };
@@ -33,12 +41,12 @@ var getRandomComments = function (quantity) {
 };
 
 // Функация, возвращающая массив заданного количества объектов с данными о фотографиях
-var createFotosArray = function (quantity) {
+var createPhotosArray = function (quantity) {
   var array = [];
   for (var i = 0; i < quantity; i++) {
     array[i] = {
-      url: 'photos/' + (i + 1) + '.jpg',
-      likes: getRamdomValue(LIKES.min, LIKES.max),
+      url: FILES_URL.photo + (i + 1) + FILES_TYPE.jpg,
+      likes: getRamdomValue(LIKES_QUANTITY.min, LIKES_QUANTITY.max),
       comments: getRandomComments(getRamdomValue(1, COMMENTS.max))
     };
   }
@@ -47,19 +55,19 @@ var createFotosArray = function (quantity) {
 };
 
 // Функция, возвращающая фрагмент с фотографиями, созданными по шаблону
-var createFotosFragment = function (array) {
-  var fotosFragment = document.createDocumentFragment();
+var createPhotosFragment = function (array) {
+  var photosFragment = document.createDocumentFragment();
   var fotoTemplate = document.querySelector('#picture').content.querySelector('.picture');
 
-  for (var i = 0; i < array.length; i++) {
+  array.forEach(function (el) {
     var photo = fotoTemplate.cloneNode(true);
-    photo.querySelector('.picture__img').src = array[i].url;
-    photo.querySelector('.picture__likes').textContent = array[i].likes;
-    photo.querySelector('.picture__comments').textContent = array[i].comments.length;
-    fotosFragment.appendChild(photo);
-  }
+    photo.querySelector('.picture__img').src = el.url;
+    photo.querySelector('.picture__likes').textContent = el.likes;
+    photo.querySelector('.picture__comments').textContent = el.comments.length;
+    photosFragment.appendChild(photo);
+  });
 
-  return fotosFragment;
+  return photosFragment;
 };
 
 // Функция замены данных в увеличенном изображении
@@ -72,19 +80,19 @@ var fillBigPicture = function (picture, pictureData) {
   var commentFragment = document.createDocumentFragment();
   var commentTemplate = document.querySelector('#comment').content.querySelector('.social__comment');
 
-  for (var i = 0; i < pictureData.comments.length; i++) {
+  pictureData.comments.forEach(function (el) {
     var comment = commentTemplate.cloneNode(true);
-    comment.querySelector('.social__picture').src = pictureData.comments[i].avatar;
-    comment.querySelector('.social__picture').alt = pictureData.comments[i].name;
-    comment.querySelector('.social__text').textContent = pictureData.comments[i].message;
+    comment.querySelector('.social__picture').src = el.avatar;
+    comment.querySelector('.social__picture').alt = el.name;
+    comment.querySelector('.social__text').textContent = el.message;
     commentFragment.appendChild(comment);
-  }
+  });
 
   var comments = picture.querySelector('.social__comments');
   var commentsList = comments.querySelectorAll('.social__comment');
-  for (var j = 0; j < commentsList.length; j++) {
-    comments.removeChild(commentsList[j]);
-  }
+  commentsList.forEach(function (el) {
+    comments.removeChild(el);
+  });
   comments.appendChild(commentFragment);
 
   picture.querySelector('.social__comment-count').classList.add('visually-hidden');
@@ -92,11 +100,11 @@ var fillBigPicture = function (picture, pictureData) {
 };
 
 // Создание, наполнение и добавление на страницу фотографий пользователей
-var fotosList = createFotosArray(FOTOS_QUANTITY);
+var photosList = createPhotosArray(PHOTOS_QUANTITY);
 var pictures = document.querySelector('.pictures');
-pictures.appendChild(createFotosFragment(fotosList));
+pictures.appendChild(createPhotosFragment(photosList));
 
 // Поиск и заполнение информации об обной из фотографий из созданного раньше массива с данными фотографий пользователей
 var bigPicture = document.querySelector('.big-picture');
-fillBigPicture(bigPicture, fotosList[0]);
+fillBigPicture(bigPicture, photosList[0]);
 bigPicture.classList.remove('hidden');
