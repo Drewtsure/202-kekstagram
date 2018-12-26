@@ -21,6 +21,16 @@ var COMMENTS = {
   titles: ['Купил новую камеру, стал профессиональным фотографом!', 'Взял камеру погонять у сына, смотрите как я могу!', 'Это фото из моего портфолио, остальное могу прислать в личку...', 'Новый телефон фотографирует лучше камеры, продаю камеру!']
 };
 
+var KeyCodes = {
+  ESC: 27
+};
+
+var scaleValues = {
+  MIN: 25,
+  MAX: 100,
+  STEP: 25
+};
+
 // Функция, возвращающая случайное число из диапазона
 var getRamdomValue = function (min, max) {
   return Math.floor(Math.random() * (max - min) + min);
@@ -107,4 +117,111 @@ pictures.appendChild(createPhotosFragment(photosList));
 // Поиск и заполнение информации об обной из фотографий из созданного раньше массива с данными фотографий пользователей
 var bigPicture = document.querySelector('.big-picture');
 fillBigPicture(bigPicture, photosList[0]);
-bigPicture.classList.remove('hidden');
+// bigPicture.classList.remove('hidden');
+
+// Открытие и закрытие окна при загрузке нового изображения
+var uploadFileInput = document.querySelector('#upload-file');
+var uploadedImageOverlay = document.querySelector('.img-upload__overlay');
+var uploadCloseButton = uploadedImageOverlay.querySelector('.img-upload__cancel');
+
+var openWindowForUploadedPhoto = function () {
+  uploadedImageOverlay.classList.remove('hidden');
+
+  uploadCloseButton.addEventListener('click', closeWindowForUploadedPhoto);
+  document.addEventListener('keydown', closeWindowForUploadedPhotoEsc);
+};
+
+var closeWindowForUploadedPhoto = function () {
+  uploadedImageOverlay.classList.add('hidden');
+  uploadFileInput.value = '';
+
+  uploadCloseButton.removeEventListener('click', closeWindowForUploadedPhoto);
+  document.removeEventListener('keydown', closeWindowForUploadedPhotoEsc);
+};
+
+var closeWindowForUploadedPhotoEsc = function (evt) {
+  if (evt.keyCode === KeyCodes.ESC) {
+    closeWindowForUploadedPhoto();
+  }
+};
+
+uploadFileInput.addEventListener('change', function () {
+  openWindowForUploadedPhoto();
+});
+
+// Переключение эффектов
+var effectsRadioList = uploadedImageOverlay.querySelectorAll('.effects__radio');
+var imagePreview = uploadedImageOverlay.querySelector('.img-upload__preview');
+var imageElement = uploadedImageOverlay.querySelector('.img-upload__preview img');
+
+var effectsLevelWrapper = uploadedImageOverlay.querySelector('.img-upload__effect-level');
+effectsLevelWrapper.classList.add('visually-hidden');
+
+var getEffectType = function (effectName) {
+  switch (effectName) {
+    case 'effect-none':
+      return '';
+    case 'effect-chrome':
+      return 'effects__preview--chrome';
+    case 'effect-sepia':
+      return 'effects__preview--sepia';
+    case 'effect-marvin':
+      return 'effects__preview--marvin';
+    case 'effect-phobos':
+      return 'effects__preview--phobos';
+    case 'effect-heat':
+      return 'effects__preview--heat';
+    default:
+      return '';
+  }
+};
+
+effectsRadioList.forEach(function (el) {
+  el.addEventListener('click', function (evt) {
+    var effectClass = getEffectType(evt.target.id);
+    imageElement.classList = '';
+    if (effectClass !== '') {
+      imageElement.classList.add(effectClass);
+      effectsLevelWrapper.classList.remove('visually-hidden');
+    } else {
+      effectsLevelWrapper.classList.add('visually-hidden');
+    }
+  });
+});
+
+// Изменение масштаба изображения
+var smallerScaleButton = uploadedImageOverlay.querySelector('.scale__control--smaller');
+var biggerScaleButton = uploadedImageOverlay.querySelector('.scale__control--bigger');
+var scaleValueInput = uploadedImageOverlay.querySelector('.scale__control--value');
+
+var setTransformProperty = function (image, propertyValue) {
+  if (propertyValue < scaleValues.MAX) {
+    image.style.transform = 'scale(0.' + propertyValue + ')';
+  } else {
+    image.style.transform = 'scale(1)';
+  }
+};
+
+smallerScaleButton.addEventListener('click', function () {
+  var scaleInt = parseInt(scaleValueInput.value, 10);
+  if (scaleInt > scaleValues.MIN) {
+    scaleInt -= scaleValues.STEP;
+  }
+  if (scaleInt < scaleValues.MIN) {
+    scaleInt = scaleValues.MIN;
+  }
+  scaleValueInput.value = scaleInt + '%';
+  setTransformProperty(imagePreview, scaleInt);
+});
+
+biggerScaleButton.addEventListener('click', function () {
+  var scaleInt = parseInt(scaleValueInput.value, 10);
+  if (scaleInt < scaleValues.MAX) {
+    scaleInt += scaleValues.STEP;
+  }
+  if (scaleInt > scaleValues.MAX) {
+    scaleInt = scaleValues.MAX;
+  }
+  scaleValueInput.value = scaleInt + '%';
+  setTransformProperty(imagePreview, scaleInt);
+});
