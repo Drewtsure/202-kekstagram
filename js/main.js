@@ -1,9 +1,17 @@
 'use strict';
 
-var FOTOS_QUANTITY = 25;
-var LIKES = {
+var PHOTOS_QUANTITY = 25;
+var LIKES_QUANTITY = {
   min: 15,
   max: 200
+};
+var FILES_URL = {
+  img: 'img/avatar-',
+  photo: 'photos/'
+};
+var FILES_TYPE = {
+  jpg: '.jpg',
+  svg: '.svg'
 };
 var COMMENTS = {
   max: 4,
@@ -11,6 +19,16 @@ var COMMENTS = {
   list: ['Всё отлично!', 'В целом всё неплохо. Но не всё.', 'Когда вы делаете фотографию, хорошо бы убирать палец из кадра. В конце концов это просто непрофессионально.', 'Моя бабушка случайно чихнула с фотоаппаратом в руках и у неё получилась фотография лучше.', 'Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота и у меня получилась фотография лучше.', 'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'],
   names: ['Инокентий Рыбий Глаз', 'Ширик Вова', 'Даздраперма Прекрасная', 'Апполинария с Моноподом', 'Эдуард Суровый', 'Снежана Банана'],
   titles: ['Купил новую камеру, стал профессиональным фотографом!', 'Взял камеру погонять у сына, смотрите как я могу!', 'Это фото из моего портфолио, остальное могу прислать в личку...', 'Новый телефон фотографирует лучше камеры, продаю камеру!']
+};
+
+var KeyCodes = {
+  ESC: 27
+};
+
+var scaleValues = {
+  MIN: 25,
+  MAX: 100,
+  STEP: 25
 };
 
 // Функция, возвращающая случайное число из диапазона
@@ -23,7 +41,7 @@ var getRandomComments = function (quantity) {
   var comment = [];
   for (var i = 0; i < quantity; i++) {
     comment[i] = {
-      avatar: 'img/avatar-' + getRamdomValue(1, COMMENTS.avatars) + '.svg',
+      avatar: FILES_URL.img + getRamdomValue(1, COMMENTS.avatars) + FILES_TYPE.svg,
       message: COMMENTS.list[getRamdomValue(0, COMMENTS.list.length)],
       name: COMMENTS.names[getRamdomValue(0, COMMENTS.names.length)]
     };
@@ -33,12 +51,12 @@ var getRandomComments = function (quantity) {
 };
 
 // Функация, возвращающая массив заданного количества объектов с данными о фотографиях
-var createFotosArray = function (quantity) {
+var createPhotosArray = function (quantity) {
   var array = [];
   for (var i = 0; i < quantity; i++) {
     array[i] = {
-      url: 'photos/' + (i + 1) + '.jpg',
-      likes: getRamdomValue(LIKES.min, LIKES.max),
+      url: FILES_URL.photo + (i + 1) + FILES_TYPE.jpg,
+      likes: getRamdomValue(LIKES_QUANTITY.min, LIKES_QUANTITY.max),
       comments: getRandomComments(getRamdomValue(1, COMMENTS.max))
     };
   }
@@ -47,19 +65,19 @@ var createFotosArray = function (quantity) {
 };
 
 // Функция, возвращающая фрагмент с фотографиями, созданными по шаблону
-var createFotosFragment = function (array) {
-  var fotosFragment = document.createDocumentFragment();
+var createPhotosFragment = function (array) {
+  var photosFragment = document.createDocumentFragment();
   var fotoTemplate = document.querySelector('#picture').content.querySelector('.picture');
 
-  for (var i = 0; i < array.length; i++) {
+  array.forEach(function (el) {
     var photo = fotoTemplate.cloneNode(true);
-    photo.querySelector('.picture__img').src = array[i].url;
-    photo.querySelector('.picture__likes').textContent = array[i].likes;
-    photo.querySelector('.picture__comments').textContent = array[i].comments.length;
-    fotosFragment.appendChild(photo);
-  }
+    photo.querySelector('.picture__img').src = el.url;
+    photo.querySelector('.picture__likes').textContent = el.likes;
+    photo.querySelector('.picture__comments').textContent = el.comments.length;
+    photosFragment.appendChild(photo);
+  });
 
-  return fotosFragment;
+  return photosFragment;
 };
 
 // Функция замены данных в увеличенном изображении
@@ -72,19 +90,19 @@ var fillBigPicture = function (picture, pictureData) {
   var commentFragment = document.createDocumentFragment();
   var commentTemplate = document.querySelector('#comment').content.querySelector('.social__comment');
 
-  for (var i = 0; i < pictureData.comments.length; i++) {
+  pictureData.comments.forEach(function (el) {
     var comment = commentTemplate.cloneNode(true);
-    comment.querySelector('.social__picture').src = pictureData.comments[i].avatar;
-    comment.querySelector('.social__picture').alt = pictureData.comments[i].name;
-    comment.querySelector('.social__text').textContent = pictureData.comments[i].message;
+    comment.querySelector('.social__picture').src = el.avatar;
+    comment.querySelector('.social__picture').alt = el.name;
+    comment.querySelector('.social__text').textContent = el.message;
     commentFragment.appendChild(comment);
-  }
+  });
 
   var comments = picture.querySelector('.social__comments');
   var commentsList = comments.querySelectorAll('.social__comment');
-  for (var j = 0; j < commentsList.length; j++) {
-    comments.removeChild(commentsList[j]);
-  }
+  commentsList.forEach(function (el) {
+    comments.removeChild(el);
+  });
   comments.appendChild(commentFragment);
 
   picture.querySelector('.social__comment-count').classList.add('visually-hidden');
@@ -92,11 +110,118 @@ var fillBigPicture = function (picture, pictureData) {
 };
 
 // Создание, наполнение и добавление на страницу фотографий пользователей
-var fotosList = createFotosArray(FOTOS_QUANTITY);
+var photosList = createPhotosArray(PHOTOS_QUANTITY);
 var pictures = document.querySelector('.pictures');
-pictures.appendChild(createFotosFragment(fotosList));
+pictures.appendChild(createPhotosFragment(photosList));
 
 // Поиск и заполнение информации об обной из фотографий из созданного раньше массива с данными фотографий пользователей
 var bigPicture = document.querySelector('.big-picture');
-fillBigPicture(bigPicture, fotosList[0]);
-bigPicture.classList.remove('hidden');
+fillBigPicture(bigPicture, photosList[0]);
+// bigPicture.classList.remove('hidden');
+
+// Открытие и закрытие окна при загрузке нового изображения
+var uploadFileInput = document.querySelector('#upload-file');
+var uploadedImageOverlay = document.querySelector('.img-upload__overlay');
+var uploadCloseButton = uploadedImageOverlay.querySelector('.img-upload__cancel');
+
+var openWindowForUploadedPhoto = function () {
+  uploadedImageOverlay.classList.remove('hidden');
+
+  uploadCloseButton.addEventListener('click', closeWindowForUploadedPhoto);
+  document.addEventListener('keydown', closeWindowForUploadedPhotoEsc);
+};
+
+var closeWindowForUploadedPhoto = function () {
+  uploadedImageOverlay.classList.add('hidden');
+  uploadFileInput.value = '';
+
+  uploadCloseButton.removeEventListener('click', closeWindowForUploadedPhoto);
+  document.removeEventListener('keydown', closeWindowForUploadedPhotoEsc);
+};
+
+var closeWindowForUploadedPhotoEsc = function (evt) {
+  if (evt.keyCode === KeyCodes.ESC) {
+    closeWindowForUploadedPhoto();
+  }
+};
+
+uploadFileInput.addEventListener('change', function () {
+  openWindowForUploadedPhoto();
+});
+
+// Переключение эффектов
+var effectsRadioList = uploadedImageOverlay.querySelectorAll('.effects__radio');
+var imagePreview = uploadedImageOverlay.querySelector('.img-upload__preview');
+var imageElement = uploadedImageOverlay.querySelector('.img-upload__preview img');
+
+var effectsLevelWrapper = uploadedImageOverlay.querySelector('.img-upload__effect-level');
+effectsLevelWrapper.classList.add('visually-hidden');
+
+var getEffectType = function (effectName) {
+  switch (effectName) {
+    case 'effect-none':
+      return '';
+    case 'effect-chrome':
+      return 'effects__preview--chrome';
+    case 'effect-sepia':
+      return 'effects__preview--sepia';
+    case 'effect-marvin':
+      return 'effects__preview--marvin';
+    case 'effect-phobos':
+      return 'effects__preview--phobos';
+    case 'effect-heat':
+      return 'effects__preview--heat';
+    default:
+      return '';
+  }
+};
+
+effectsRadioList.forEach(function (el) {
+  el.addEventListener('click', function (evt) {
+    var effectClass = getEffectType(evt.target.id);
+    imageElement.classList = '';
+    if (effectClass !== '') {
+      imageElement.classList.add(effectClass);
+      effectsLevelWrapper.classList.remove('visually-hidden');
+    } else {
+      effectsLevelWrapper.classList.add('visually-hidden');
+    }
+  });
+});
+
+// Изменение масштаба изображения
+var smallerScaleButton = uploadedImageOverlay.querySelector('.scale__control--smaller');
+var biggerScaleButton = uploadedImageOverlay.querySelector('.scale__control--bigger');
+var scaleValueInput = uploadedImageOverlay.querySelector('.scale__control--value');
+
+var setTransformProperty = function (image, propertyValue) {
+  if (propertyValue < scaleValues.MAX) {
+    image.style.transform = 'scale(0.' + propertyValue + ')';
+  } else {
+    image.style.transform = 'scale(1)';
+  }
+};
+
+smallerScaleButton.addEventListener('click', function () {
+  var scaleInt = parseInt(scaleValueInput.value, 10);
+  if (scaleInt > scaleValues.MIN) {
+    scaleInt -= scaleValues.STEP;
+  }
+  if (scaleInt < scaleValues.MIN) {
+    scaleInt = scaleValues.MIN;
+  }
+  scaleValueInput.value = scaleInt + '%';
+  setTransformProperty(imagePreview, scaleInt);
+});
+
+biggerScaleButton.addEventListener('click', function () {
+  var scaleInt = parseInt(scaleValueInput.value, 10);
+  if (scaleInt < scaleValues.MAX) {
+    scaleInt += scaleValues.STEP;
+  }
+  if (scaleInt > scaleValues.MAX) {
+    scaleInt = scaleValues.MAX;
+  }
+  scaleValueInput.value = scaleInt + '%';
+  setTransformProperty(imagePreview, scaleInt);
+});
