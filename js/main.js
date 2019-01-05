@@ -131,28 +131,28 @@ var uploadFileInput = document.querySelector('#upload-file');
 var uploadedImageOverlay = document.querySelector('.img-upload__overlay');
 var uploadCloseButton = uploadedImageOverlay.querySelector('.img-upload__cancel');
 
-var onOpenUploadedPhoto = function () {
+var onNewPhotoUpload = function () {
   uploadedImageOverlay.classList.remove('hidden');
 
-  uploadCloseButton.addEventListener('click', onCloseUploadedPhoto);
+  uploadCloseButton.addEventListener('click', onClosePhotoClick);
   document.addEventListener('keydown', onDocumentKeydown);
 };
 
-var onCloseUploadedPhoto = function () {
+var onClosePhotoClick = function () {
   uploadedImageOverlay.classList.add('hidden');
   uploadFileInput.value = '';
 
-  uploadCloseButton.removeEventListener('click', onCloseUploadedPhoto);
+  uploadCloseButton.removeEventListener('click', onClosePhotoClick);
   document.removeEventListener('keydown', onDocumentKeydown);
 };
 
 var onDocumentKeydown = function (evt) {
   if (evt.keyCode === KeyCodes.ESC) {
-    onCloseUploadedPhoto();
+    onClosePhotoClick();
   }
 };
 
-uploadFileInput.addEventListener('change', onOpenUploadedPhoto);
+uploadFileInput.addEventListener('change', onNewPhotoUpload);
 
 // Переключение эффектов
 var effectsRadioList = uploadedImageOverlay.querySelectorAll('.effects__radio');
