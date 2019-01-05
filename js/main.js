@@ -130,6 +130,7 @@ fillBigPicture(bigPicture, photosList[0]);
 var uploadFileInput = document.querySelector('#upload-file');
 var uploadedImageOverlay = document.querySelector('.img-upload__overlay');
 var uploadCloseButton = uploadedImageOverlay.querySelector('.img-upload__cancel');
+var textDescription = uploadedImageOverlay.querySelector('.text__description');
 
 var onNewPhotoUpload = function () {
   uploadedImageOverlay.classList.remove('hidden');
@@ -147,7 +148,7 @@ var onClosePhotoClick = function () {
 };
 
 var onDocumentKeydown = function (evt) {
-  if (evt.keyCode === KeyCodes.ESC) {
+  if (evt.keyCode === KeyCodes.ESC && evt.target !== textDescription) {
     onClosePhotoClick();
   }
 };
