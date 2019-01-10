@@ -25,6 +25,14 @@ var KeyCodes = {
   ESC: 27
 };
 
+var efectsNames = {
+  CHROME: 'effects__preview--chrome',
+  SEPIA: 'effects__preview--sepia',
+  MARVIN: 'effects__preview--marvin',
+  PHOBOS: 'effects__preview--phobos',
+  HEAT: 'effects__preview--heat'
+};
+
 var scaleValues = {
   MIN: 25,
   MAX: 100,
@@ -69,11 +77,11 @@ var createPhotosFragment = function (array) {
   var photosFragment = document.createDocumentFragment();
   var fotoTemplate = document.querySelector('#picture').content.querySelector('.picture');
 
-  array.forEach(function (el) {
+  array.forEach(function (element) {
     var photo = fotoTemplate.cloneNode(true);
-    photo.querySelector('.picture__img').src = el.url;
-    photo.querySelector('.picture__likes').textContent = el.likes;
-    photo.querySelector('.picture__comments').textContent = el.comments.length;
+    photo.querySelector('.picture__img').src = element.url;
+    photo.querySelector('.picture__likes').textContent = element.likes;
+    photo.querySelector('.picture__comments').textContent = element.comments.length;
     photosFragment.appendChild(photo);
   });
 
@@ -90,11 +98,11 @@ var fillBigPicture = function (picture, pictureData) {
   var commentFragment = document.createDocumentFragment();
   var commentTemplate = document.querySelector('#comment').content.querySelector('.social__comment');
 
-  pictureData.comments.forEach(function (el) {
+  pictureData.comments.forEach(function (element) {
     var comment = commentTemplate.cloneNode(true);
-    comment.querySelector('.social__picture').src = el.avatar;
-    comment.querySelector('.social__picture').alt = el.name;
-    comment.querySelector('.social__text').textContent = el.message;
+    comment.querySelector('.social__picture').src = element.avatar;
+    comment.querySelector('.social__picture').alt = element.name;
+    comment.querySelector('.social__text').textContent = element.message;
     commentFragment.appendChild(comment);
   });
 
@@ -117,37 +125,35 @@ pictures.appendChild(createPhotosFragment(photosList));
 // Поиск и заполнение информации об обной из фотографий из созданного раньше массива с данными фотографий пользователей
 var bigPicture = document.querySelector('.big-picture');
 fillBigPicture(bigPicture, photosList[0]);
-// bigPicture.classList.remove('hidden');
 
 // Открытие и закрытие окна при загрузке нового изображения
 var uploadFileInput = document.querySelector('#upload-file');
 var uploadedImageOverlay = document.querySelector('.img-upload__overlay');
 var uploadCloseButton = uploadedImageOverlay.querySelector('.img-upload__cancel');
+var textDescription = uploadedImageOverlay.querySelector('.text__description');
 
-var openWindowForUploadedPhoto = function () {
+var onNewPhotoUpload = function () {
   uploadedImageOverlay.classList.remove('hidden');
 
-  uploadCloseButton.addEventListener('click', closeWindowForUploadedPhoto);
-  document.addEventListener('keydown', closeWindowForUploadedPhotoEsc);
+  uploadCloseButton.addEventListener('click', onClosePhotoClick);
+  document.addEventListener('keydown', onDocumentKeydown);
 };
 
-var closeWindowForUploadedPhoto = function () {
+var onClosePhotoClick = function () {
   uploadedImageOverlay.classList.add('hidden');
   uploadFileInput.value = '';
 
-  uploadCloseButton.removeEventListener('click', closeWindowForUploadedPhoto);
-  document.removeEventListener('keydown', closeWindowForUploadedPhotoEsc);
+  uploadCloseButton.removeEventListener('click', onClosePhotoClick);
+  document.removeEventListener('keydown', onDocumentKeydown);
 };
 
-var closeWindowForUploadedPhotoEsc = function (evt) {
-  if (evt.keyCode === KeyCodes.ESC) {
-    closeWindowForUploadedPhoto();
+var onDocumentKeydown = function (evt) {
+  if (evt.keyCode === KeyCodes.ESC && evt.target !== textDescription) {
+    onClosePhotoClick();
   }
 };
 
-uploadFileInput.addEventListener('change', function () {
-  openWindowForUploadedPhoto();
-});
+uploadFileInput.addEventListener('change', onNewPhotoUpload);
 
 // Переключение эффектов
 var effectsRadioList = uploadedImageOverlay.querySelectorAll('.effects__radio');
@@ -162,30 +168,30 @@ var getEffectType = function (effectName) {
     case 'effect-none':
       return '';
     case 'effect-chrome':
-      return 'effects__preview--chrome';
+      return efectsNames.CHROME;
     case 'effect-sepia':
-      return 'effects__preview--sepia';
+      return efectsNames.SEPIA;
     case 'effect-marvin':
-      return 'effects__preview--marvin';
+      return efectsNames.MARVIN;
     case 'effect-phobos':
-      return 'effects__preview--phobos';
+      return efectsNames.PHOBOS;
     case 'effect-heat':
-      return 'effects__preview--heat';
+      return efectsNames.HEAT;
     default:
       return '';
   }
 };
 
-effectsRadioList.forEach(function (el) {
-  el.addEventListener('click', function (evt) {
+effectsRadioList.forEach(function (element) {
+  element.addEventListener('click', function (evt) {
     var effectClass = getEffectType(evt.target.id);
-    imageElement.classList = '';
     if (effectClass !== '') {
-      imageElement.classList.add(effectClass);
+      imageElement.className = effectClass;
       effectsLevelWrapper.classList.remove('visually-hidden');
-    } else {
-      effectsLevelWrapper.classList.add('visually-hidden');
+      return;
     }
+    imageElement.className = '';
+    effectsLevelWrapper.classList.add('visually-hidden');
   });
 });
 
@@ -194,34 +200,23 @@ var smallerScaleButton = uploadedImageOverlay.querySelector('.scale__control--sm
 var biggerScaleButton = uploadedImageOverlay.querySelector('.scale__control--bigger');
 var scaleValueInput = uploadedImageOverlay.querySelector('.scale__control--value');
 
-var setTransformProperty = function (image, propertyValue) {
-  if (propertyValue < scaleValues.MAX) {
-    image.style.transform = 'scale(0.' + propertyValue + ')';
-  } else {
-    image.style.transform = 'scale(1)';
-  }
+var setScale = function (scale) {
+  scaleValueInput.value = scale + '%';
+  imagePreview.style.transform = scale < scaleValues.MAX ? 'scale(0.' + scale + ')' : 'scale(1)';
 };
 
 smallerScaleButton.addEventListener('click', function () {
   var scaleInt = parseInt(scaleValueInput.value, 10);
-  if (scaleInt > scaleValues.MIN) {
+  if (scaleInt >= (scaleValues.MIN + scaleValues.STEP)) {
     scaleInt -= scaleValues.STEP;
   }
-  if (scaleInt < scaleValues.MIN) {
-    scaleInt = scaleValues.MIN;
-  }
-  scaleValueInput.value = scaleInt + '%';
-  setTransformProperty(imagePreview, scaleInt);
+  setScale(scaleInt);
 });
 
 biggerScaleButton.addEventListener('click', function () {
   var scaleInt = parseInt(scaleValueInput.value, 10);
-  if (scaleInt < scaleValues.MAX) {
+  if (scaleInt <= (scaleValues.MAX - scaleValues.STEP)) {
     scaleInt += scaleValues.STEP;
   }
-  if (scaleInt > scaleValues.MAX) {
-    scaleInt = scaleValues.MAX;
-  }
-  scaleValueInput.value = scaleInt + '%';
-  setTransformProperty(imagePreview, scaleInt);
+  setScale(scaleInt);
 });
