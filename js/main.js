@@ -153,7 +153,8 @@ var onDocumentKeydown = function (evt) {
   }
 };
 
-uploadFileInput.addEventListener('change', onNewPhotoUpload);
+// uploadFileInput.addEventListener('change', onNewPhotoUpload);
+onNewPhotoUpload();
 
 // Переключение эффектов
 var effectsRadioList = uploadedImageOverlay.querySelectorAll('.effects__radio');
@@ -161,7 +162,9 @@ var imagePreview = uploadedImageOverlay.querySelector('.img-upload__preview');
 var imageElement = uploadedImageOverlay.querySelector('.img-upload__preview img');
 
 var effectsLevelWrapper = uploadedImageOverlay.querySelector('.img-upload__effect-level');
-effectsLevelWrapper.classList.add('visually-hidden');
+var effectsLevelPin = effectsLevelWrapper.querySelector('.effect-level__pin');
+var effectsLevelDepth = effectsLevelWrapper.querySelector('.effect-level__depth');
+// effectsLevelWrapper.classList.add('visually-hidden');
 
 var getEffectType = function (effectName) {
   switch (effectName) {
@@ -193,6 +196,41 @@ effectsRadioList.forEach(function (element) {
     imageElement.className = '';
     effectsLevelWrapper.classList.add('visually-hidden');
   });
+});
+
+// Перетаскивание пина эффекта
+
+effectsLevelPin.style.left = '100%'; // 453, -6
+effectsLevelDepth.style.width = '100%';
+
+effectsLevelPin.addEventListener('mousedown', function (evt) {
+  evt.preventDefault();
+  var startX = evt.clientX;
+
+  var onEffectsLevelPinMousemove = function (moveEvt) {
+    moveEvt.preventDefault();
+
+    var shiftX = startX - moveEvt.clientX;
+
+    startX = moveEvt.clientX;
+
+    // effectsLevelPin.style.top = (effectsLevelPin.offsetTop - shift.y) + '%';
+    var newLeft = (effectsLevelPin.offsetLeft - shiftX) / effectsLevelDepth.offsetWidth * 100;
+
+    if (newLeft > 0 && newLeft < 100) {
+      effectsLevelPin.style.left = newLeft + '%';
+    }
+  };
+
+  var onEffectsLevelPinMouseup = function (upEvt) {
+    upEvt.preventDefault();
+
+    effectsLevelPin.removeEventListener('mousemove', onEffectsLevelPinMousemove);
+    effectsLevelPin.removeEventListener('mouseup', onEffectsLevelPinMouseup);
+  };
+
+  effectsLevelPin.addEventListener('mousemove', onEffectsLevelPinMousemove);
+  effectsLevelPin.addEventListener('mouseup', onEffectsLevelPinMouseup);
 });
 
 // Изменение масштаба изображения
