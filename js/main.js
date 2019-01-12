@@ -25,15 +25,64 @@ var KeyCodes = {
   ESC: 27
 };
 
-var efectsNames = {
-  CHROME: 'effects__preview--chrome',
-  SEPIA: 'effects__preview--sepia',
-  MARVIN: 'effects__preview--marvin',
-  PHOBOS: 'effects__preview--phobos',
-  HEAT: 'effects__preview--heat'
+var Effect = {
+  ORIGIN: {
+    id: 'effect-none',
+    name: '',
+    filter: '',
+    points: '',
+    min: 0,
+    max: 100
+  },
+  CHROME: {
+    id: 'effect-chrome',
+    name: 'effects__preview--chrome',
+    filter: 'grayscale',
+    points: '',
+    min: 0,
+    max: 1
+  },
+  SEPIA: {
+    id: 'effect-sepia',
+    name: 'effects__preview--sepia',
+    filter: 'sepia',
+    points: '',
+    min: 0,
+    max: 1
+  },
+  MARVIN: {
+    id: 'effect-marvin',
+    name: 'effects__preview--marvin',
+    filter: 'invert',
+    points: '%',
+    min: 0,
+    max: 100
+  },
+  PHOBOS: {
+    id: 'effect-phobos',
+    name: 'effects__preview--phobos',
+    filter: 'blur',
+    points: 'px',
+    min: 0,
+    max: 3
+  },
+  HEAT: {
+    id: 'effect-heat',
+    name: 'effects__preview--heat',
+    filter: 'brightness',
+    points: '',
+    min: 1,
+    max: 3
+  }
 };
 
-var scaleValues = {
+var EffectLevel = {
+  MIN: 0,
+  MID: 50,
+  MAX: 100
+};
+
+var ScaleValue = {
   MIN: 25,
   MAX: 100,
   STEP: 25
@@ -153,84 +202,114 @@ var onDocumentKeydown = function (evt) {
   }
 };
 
-// uploadFileInput.addEventListener('change', onNewPhotoUpload);
-onNewPhotoUpload();
+uploadFileInput.addEventListener('change', onNewPhotoUpload);
+// onNewPhotoUpload();
 
 // Переключение эффектов
 var effectsRadioList = uploadedImageOverlay.querySelectorAll('.effects__radio');
 var imagePreview = uploadedImageOverlay.querySelector('.img-upload__preview');
 var imageElement = uploadedImageOverlay.querySelector('.img-upload__preview img');
 
-var effectsLevelWrapper = uploadedImageOverlay.querySelector('.img-upload__effect-level');
-var effectsLevelPin = effectsLevelWrapper.querySelector('.effect-level__pin');
-var effectsLevelDepth = effectsLevelWrapper.querySelector('.effect-level__depth');
-// effectsLevelWrapper.classList.add('visually-hidden');
+var effectLevelWrapper = uploadedImageOverlay.querySelector('.img-upload__effect-level');
+var effectLevelPin = effectLevelWrapper.querySelector('.effect-level__pin');
+var effectLevelLine = effectLevelWrapper.querySelector('.effect-level__line');
+var effectLevelDepth = effectLevelWrapper.querySelector('.effect-level__depth');
+var effectLevelInput = effectLevelWrapper.querySelector('.effect-level__value');
+effectLevelWrapper.classList.add('visually-hidden');
+
+var effectType;
 
 var getEffectType = function (effectName) {
   switch (effectName) {
-    case 'effect-none':
-      return '';
-    case 'effect-chrome':
-      return efectsNames.CHROME;
-    case 'effect-sepia':
-      return efectsNames.SEPIA;
-    case 'effect-marvin':
-      return efectsNames.MARVIN;
-    case 'effect-phobos':
-      return efectsNames.PHOBOS;
-    case 'effect-heat':
-      return efectsNames.HEAT;
+    case Effect.ORIGIN.id:
+      return Effect.ORIGIN;
+    case Effect.CHROME.id:
+      return Effect.CHROME;
+    case Effect.SEPIA.id:
+      return Effect.SEPIA;
+    case Effect.MARVIN.id:
+      return Effect.MARVIN;
+    case Effect.PHOBOS.id:
+      return Effect.PHOBOS;
+    case Effect.HEAT.id:
+      return Effect.HEAT;
     default:
       return '';
   }
 };
 
+// Навешивание обработчиков клика на все типы эффектов
 effectsRadioList.forEach(function (element) {
   element.addEventListener('click', function (evt) {
-    var effectClass = getEffectType(evt.target.id);
-    if (effectClass !== '') {
-      imageElement.className = effectClass;
-      effectsLevelWrapper.classList.remove('visually-hidden');
+    effectType = getEffectType(evt.target.id);
+    if (effectType.name !== '') {
+      setEffectLevel(effectType, EffectLevel.MAX);
       return;
     }
-    imageElement.className = '';
-    effectsLevelWrapper.classList.add('visually-hidden');
+    setEffectLevel(effectType);
   });
 });
 
-// Перетаскивание пина эффекта
+var setEffectLevel = function (effect, level) {
+  if (effect.name !== '') {
+    // Применение фильтра к фотографии
+    imageElement.className = effect.name;
+    var relativeLevel = effect.min + (level / EffectLevel.MAX) * (effect.max - effect.min);
+    imageElement.style.filter = effect.filter + '(' + relativeLevel + effect.points + ')';
+    effectLevelInput.setAttribute('value', relativeLevel);
+    effectLevelWrapper.classList.remove('visually-hidden');
 
-effectsLevelPin.style.left = '100%'; // 453, -6
-effectsLevelDepth.style.width = '100%';
+    // Задание положения ползунка и уровня эффекта
+    effectLevelPin.style.left = level + '%';
+    effectLevelDepth.style.width = level + '%';
+    return;
+  }
 
-effectsLevelPin.addEventListener('mousedown', function (evt) {
+  // Сбрасывание эффекта при выборе эффекта «Оригинал»
+  imageElement.style = '';
+  imageElement.className = '';
+  effectLevelWrapper.classList.add('visually-hidden');
+};
+
+// Обработка события перетаскивания пина эффекта
+
+effectLevelPin.addEventListener('mousedown', function (evt) {
   evt.preventDefault();
-  var startX = evt.clientX;
 
-  var onEffectsLevelPinMousemove = function (moveEvt) {
+  var pinStartIndent = evt.clientX;
+
+  var onPinMouseMove = function (moveEvt) {
     moveEvt.preventDefault();
 
-    var shiftX = startX - moveEvt.clientX;
+    var pinShift = pinStartIndent - moveEvt.clientX;
+    pinStartIndent = moveEvt.clientX;
 
-    startX = moveEvt.clientX;
+    var effectLevelLineRect = effectLevelLine.getBoundingClientRect();
+    var pinIndent = (pinStartIndent - pinShift - effectLevelLineRect.left) / effectLevelLine.offsetWidth * EffectLevel.MAX;
+    if (pinIndent > EffectLevel.MIN && pinIndent < EffectLevel.MAX) {
+      setEffectLevel(effectType, pinIndent);
+      return;
+    }
 
-    // effectsLevelPin.style.top = (effectsLevelPin.offsetTop - shift.y) + '%';
-    var newLeft = (effectsLevelPin.offsetLeft - shiftX) / effectsLevelDepth.offsetWidth * 100;
-
-    if (newLeft > 0 && newLeft < 100) {
-      effectsLevelPin.style.left = newLeft + '%';
+    // Установка крайних положений при выходе за границы полосы фильтра
+    switch (pinIndent < EffectLevel.MID) {
+      case true:
+        setEffectLevel(effectType, EffectLevel.MIN);
+        break;
+      case false:
+        setEffectLevel(effectType, EffectLevel.MAX);
+        break;
     }
   };
 
-  var onEffectsLevelPinMouseup = function (upEvt) {
+  var onPinMouseUp = function (upEvt) {
     upEvt.preventDefault();
-
-    effectsLevelPin.removeEventListener('mousemove', onEffectsLevelPinMousemove);
-    effectsLevelPin.removeEventListener('mouseup', onEffectsLevelPinMouseup);
+    document.removeEventListener('mousemove', onPinMouseMove);
+    document.removeEventListener('mouseup', onPinMouseUp);
   };
 
-  effectsLevelPin.addEventListener('mousemove', onEffectsLevelPinMousemove);
-  effectsLevelPin.addEventListener('mouseup', onEffectsLevelPinMouseup);
+  document.addEventListener('mousemove', onPinMouseMove);
+  document.addEventListener('mouseup', onPinMouseUp);
 });
 
 // Изменение масштаба изображения
@@ -240,21 +319,21 @@ var scaleValueInput = uploadedImageOverlay.querySelector('.scale__control--value
 
 var setScale = function (scale) {
   scaleValueInput.value = scale + '%';
-  imagePreview.style.transform = scale < scaleValues.MAX ? 'scale(0.' + scale + ')' : 'scale(1)';
+  imagePreview.style.transform = scale < ScaleValue.MAX ? 'scale(0.' + scale + ')' : 'scale(1)';
 };
 
 smallerScaleButton.addEventListener('click', function () {
   var scaleInt = parseInt(scaleValueInput.value, 10);
-  if (scaleInt >= (scaleValues.MIN + scaleValues.STEP)) {
-    scaleInt -= scaleValues.STEP;
+  if (scaleInt >= (ScaleValue.MIN + ScaleValue.STEP)) {
+    scaleInt -= ScaleValue.STEP;
   }
   setScale(scaleInt);
 });
 
 biggerScaleButton.addEventListener('click', function () {
   var scaleInt = parseInt(scaleValueInput.value, 10);
-  if (scaleInt <= (scaleValues.MAX - scaleValues.STEP)) {
-    scaleInt += scaleValues.STEP;
+  if (scaleInt <= (ScaleValue.MAX - ScaleValue.STEP)) {
+    scaleInt += ScaleValue.STEP;
   }
   setScale(scaleInt);
 });
