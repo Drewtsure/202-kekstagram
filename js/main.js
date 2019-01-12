@@ -181,8 +181,15 @@ var uploadedImageOverlay = document.querySelector('.img-upload__overlay');
 var uploadCloseButton = uploadedImageOverlay.querySelector('.img-upload__cancel');
 var textDescription = uploadedImageOverlay.querySelector('.text__description');
 
+// Установка параметров для браузерной валидации
+var setValidationAttributes = function () {
+  textDescription.setAttribute('maxlength', '140');
+};
+
+
 var onNewPhotoUpload = function () {
   uploadedImageOverlay.classList.remove('hidden');
+  setValidationAttributes();
 
   uploadCloseButton.addEventListener('click', onClosePhotoClick);
   document.addEventListener('keydown', onDocumentKeydown);
@@ -203,7 +210,6 @@ var onDocumentKeydown = function (evt) {
 };
 
 uploadFileInput.addEventListener('change', onNewPhotoUpload);
-// onNewPhotoUpload();
 
 // Переключение эффектов
 var effectsRadioList = uploadedImageOverlay.querySelectorAll('.effects__radio');
