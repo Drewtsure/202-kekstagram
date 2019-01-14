@@ -88,6 +88,8 @@ var ScaleValue = {
   STEP: 25
 };
 
+var TEXTAREA_MAX = '140';
+
 // Функция, возвращающая случайное число из диапазона
 var getRamdomValue = function (min, max) {
   return Math.floor(Math.random() * (max - min) + min);
@@ -182,14 +184,15 @@ var uploadCloseButton = uploadedImageOverlay.querySelector('.img-upload__cancel'
 var textDescription = uploadedImageOverlay.querySelector('.text__description');
 
 // Установка параметров для браузерной валидации
-var setValidationAttributes = function () {
-  textDescription.setAttribute('maxlength', '140');
+var setValidationAttributes = function (value) {
+  textDescription.maxLength = value;
 };
 
-
-var onNewPhotoUpload = function () {
+var onNewPhotoUploadChange = function () {
   uploadedImageOverlay.classList.remove('hidden');
-  setValidationAttributes();
+  setValidationAttributes(TEXTAREA_MAX);
+  setFilterType(Effect.ORIGIN);
+  uploadedImageOverlay.querySelector('input[id=' + Effect.ORIGIN.id + ']').checked = true;
 
   uploadCloseButton.addEventListener('click', onClosePhotoClick);
   document.addEventListener('keydown', onDocumentKeydown);
@@ -209,7 +212,7 @@ var onDocumentKeydown = function (evt) {
   }
 };
 
-uploadFileInput.addEventListener('change', onNewPhotoUpload);
+uploadFileInput.addEventListener('change', onNewPhotoUploadChange);
 
 // Переключение эффектов
 var effectsRadioList = uploadedImageOverlay.querySelectorAll('.effects__radio');
@@ -248,37 +251,55 @@ var getEffectType = function (effectName) {
 effectsRadioList.forEach(function (element) {
   element.addEventListener('click', function (evt) {
     effectType = getEffectType(evt.target.id);
-    if (effectType.name !== '') {
-      setEffectLevel(effectType, EffectLevel.MAX);
-      return;
-    }
-    setEffectLevel(effectType);
+    return effectType.name === '' ? setFilterType(effectType) : setFilterType(effectType, EffectLevel.MAX);
   });
 });
 
-var setEffectLevel = function (effect, level) {
-  if (effect.name !== '') {
-    // Применение фильтра к фотографии
-    imageElement.className = effect.name;
-    var relativeLevel = effect.min + (level / EffectLevel.MAX) * (effect.max - effect.min);
-    imageElement.style.filter = effect.filter + '(' + relativeLevel + effect.points + ')';
-    effectLevelInput.setAttribute('value', relativeLevel);
-    effectLevelWrapper.classList.remove('visually-hidden');
-
-    // Задание положения ползунка и уровня эффекта
-    effectLevelPin.style.left = level + '%';
-    effectLevelDepth.style.width = level + '%';
+var setFilterType = function (effect, level) {
+  if (effect.name === '') {
+    imageElement.style = '';
+    imageElement.className = '';
+    effectLevelWrapper.classList.add('visually-hidden');
+    setEffectLevel(effect, level);
     return;
   }
 
-  // Сбрасывание эффекта при выборе эффекта «Оригинал»
-  imageElement.style = '';
-  imageElement.className = '';
-  effectLevelWrapper.classList.add('visually-hidden');
+  imageElement.className = effect.name;
+  effectLevelWrapper.classList.remove('visually-hidden');
+  setEffectLevel(effect, level);
+};
+
+var setEffectLevel = function (effect, level) {
+  // Применение фильтра к фотографии
+  var relativeLevel = effect.min + (level / EffectLevel.MAX) * (effect.max - effect.min);
+  imageElement.style.filter = effect.filter + '(' + relativeLevel + effect.points + ')';
+  effectLevelInput.value = relativeLevel;
+
+  // Задание положения ползунка и уровня эффекта
+  effectLevelPin.style.left = level + '%';
+  effectLevelDepth.style.width = level + '%';
+};
+
+var checkMovedPin = function (effect, level) {
+  if (level > EffectLevel.MIN && level < EffectLevel.MAX) {
+    setEffectLevel(effectType, level);
+    return;
+  }
+
+  // Установка крайних положений при выходе за границы полосы фильтра
+  switch (level < EffectLevel.MID) {
+    case true:
+      setEffectLevel(effectType, EffectLevel.MIN);
+      break;
+    case false:
+      setEffectLevel(effectType, EffectLevel.MAX);
+      break;
+    default:
+      setEffectLevel(effectType, EffectLevel.MAX);
+  }
 };
 
 // Обработка события перетаскивания пина эффекта
-
 effectLevelPin.addEventListener('mousedown', function (evt) {
   evt.preventDefault();
 
@@ -292,20 +313,7 @@ effectLevelPin.addEventListener('mousedown', function (evt) {
 
     var effectLevelLineRect = effectLevelLine.getBoundingClientRect();
     var pinIndent = (pinStartIndent - pinShift - effectLevelLineRect.left) / effectLevelLine.offsetWidth * EffectLevel.MAX;
-    if (pinIndent > EffectLevel.MIN && pinIndent < EffectLevel.MAX) {
-      setEffectLevel(effectType, pinIndent);
-      return;
-    }
-
-    // Установка крайних положений при выходе за границы полосы фильтра
-    switch (pinIndent < EffectLevel.MID) {
-      case true:
-        setEffectLevel(effectType, EffectLevel.MIN);
-        break;
-      case false:
-        setEffectLevel(effectType, EffectLevel.MAX);
-        break;
-    }
+    checkMovedPin(effectType, pinIndent);
   };
 
   var onPinMouseUp = function (upEvt) {
@@ -316,6 +324,15 @@ effectLevelPin.addEventListener('mousedown', function (evt) {
 
   document.addEventListener('mousemove', onPinMouseMove);
   document.addEventListener('mouseup', onPinMouseUp);
+});
+
+// Обработка события клика по полосе эффекта
+effectLevelWrapper.addEventListener('click', function (evt) {
+  evt.preventDefault();
+
+  var effectLevelLineRect = effectLevelLine.getBoundingClientRect();
+  var pinIndent = (evt.clientX - effectLevelLineRect.left) / effectLevelLine.offsetWidth * EffectLevel.MAX;
+  checkMovedPin(effectType, pinIndent);
 });
 
 // Изменение масштаба изображения
@@ -330,16 +347,10 @@ var setScale = function (scale) {
 
 smallerScaleButton.addEventListener('click', function () {
   var scaleInt = parseInt(scaleValueInput.value, 10);
-  if (scaleInt >= (ScaleValue.MIN + ScaleValue.STEP)) {
-    scaleInt -= ScaleValue.STEP;
-  }
-  setScale(scaleInt);
+  return scaleInt >= (ScaleValue.MIN + ScaleValue.STEP) ? setScale(scaleInt - ScaleValue.STEP) : setScale(scaleInt);
 });
 
 biggerScaleButton.addEventListener('click', function () {
   var scaleInt = parseInt(scaleValueInput.value, 10);
-  if (scaleInt <= (ScaleValue.MAX - ScaleValue.STEP)) {
-    scaleInt += ScaleValue.STEP;
-  }
-  setScale(scaleInt);
+  return scaleInt <= (ScaleValue.MAX - ScaleValue.STEP) ? setScale(scaleInt + ScaleValue.STEP) : setScale(scaleInt);
 });
