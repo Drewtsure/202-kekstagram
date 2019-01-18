@@ -2,7 +2,7 @@
 
 (function () {
   var DOWNLOAD_URL = 'https://js.dump.academy/kekstagram/data';
-  var UPLOAD_URL = 'https://js.dump.academy/kekstagram1';
+  var UPLOAD_URL = 'https://js.dump.academy/kekstagram';
 
   window.download = function (onLoad, onError) {
     var xhr = new XMLHttpRequest();
