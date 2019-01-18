@@ -3,9 +3,9 @@
 (function () {
   window.preview = {
     // Функция создание увеличенного изображения из данных фотографии
-    createPreview: function (picture, pictureData) {
+    create: function (picture, pictureData) {
       picture.querySelector('.big-picture__img img').src = pictureData.url;
-      picture.querySelector('.social__caption').textContent = pictureData.title;
+      picture.querySelector('.social__caption').textContent = pictureData.description;
       picture.querySelector('.likes-count').textContent = pictureData.likes;
       picture.querySelector('.comments-count').textContent = pictureData.comments.length;
 

@@ -71,19 +71,20 @@
   var TEXTAREA_MAX = '140';
 
   // Открытие и закрытие окна при загрузке нового изображения
-  var uploadFileInput = document.querySelector('#upload-file');
-  var uploadedImageOverlay = document.querySelector('.img-upload__overlay');
+  var uploadFormWrapper = document.querySelector('.img-upload');
+  var uploadFileInput = uploadFormWrapper.querySelector('#upload-file');
+  var uploadedImageOverlay = uploadFormWrapper.querySelector('.img-upload__overlay');
   var uploadCloseButton = uploadedImageOverlay.querySelector('.img-upload__cancel');
   var textDescription = uploadedImageOverlay.querySelector('.text__description');
 
-  // Установка параметров для браузерной валидации
-  var setValidationAttributes = function (value) {
-    textDescription.maxLength = value;
+  var resetUploadForm = function () {
+    uploadedImageOverlay.classList.add('hidden');
+    uploadFileInput.value = '';
   };
 
   var onNewPhotoUploadChange = function () {
     uploadedImageOverlay.classList.remove('hidden');
-    setValidationAttributes(TEXTAREA_MAX);
+    textDescription.maxLength = TEXTAREA_MAX;
     setFilterType(Effect.ORIGIN);
     uploadedImageOverlay.querySelector('input[id=' + Effect.ORIGIN.id + ']').checked = true;
 
@@ -92,8 +93,7 @@
   };
 
   var onClosePhotoClick = function () {
-    uploadedImageOverlay.classList.add('hidden');
-    uploadFileInput.value = '';
+    resetUploadForm();
 
     uploadCloseButton.removeEventListener('click', onClosePhotoClick);
     document.removeEventListener('keydown', onDocumentKeydown);
@@ -247,4 +247,17 @@
     var scaleInt = parseInt(scaleValueInput.value, 10);
     return scaleInt <= (ScaleValue.MAX - ScaleValue.STEP) ? setScale(scaleInt + ScaleValue.STEP) : setScale(scaleInt);
   });
+
+  var form = uploadFormWrapper.querySelector('.img-upload__form');
+  form.addEventListener('submit', function (evt) {
+    window.upload(new FormData(form), function (response) {
+      window.form.resetUploadForm(uploadedImageOverlay, uploadFileInput);
+      window.utils.showSuccess(response);
+    }, window.utils.showUploadError);
+    evt.preventDefault();
+  });
+
+  window.form = {
+    resetUploadForm: resetUploadForm
+  };
 })();
