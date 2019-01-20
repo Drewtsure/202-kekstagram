@@ -26,9 +26,9 @@
     var comment = [];
     for (var i = 0; i < quantity; i++) {
       comment[i] = {
-        avatar: FILES_URL.img + window.utils.getRamdomValue(1, COMMENTS.avatars) + FILES_TYPE.svg,
-        message: COMMENTS.list[window.utils.getRamdomValue(0, COMMENTS.list.length)],
-        name: COMMENTS.names[window.utils.getRamdomValue(0, COMMENTS.names.length)]
+        avatar: FILES_URL.img + window.utils.getRandomValue(1, COMMENTS.avatars) + FILES_TYPE.svg,
+        message: COMMENTS.list[window.utils.getRandomValue(0, COMMENTS.list.length)],
+        name: COMMENTS.names[window.utils.getRandomValue(0, COMMENTS.names.length)]
       };
     }
     return comment;
@@ -41,9 +41,9 @@
       for (var i = 0; i < quantity; i++) {
         array[i] = {
           url: FILES_URL.photo + (i + 1) + FILES_TYPE.jpg,
-          likes: window.utils.getRamdomValue(LIKES_QUANTITY.min, LIKES_QUANTITY.max),
-          comments: getRandomComments(window.utils.getRamdomValue(1, COMMENTS.max)),
-          title: COMMENTS.titles[window.utils.getRamdomValue(0, COMMENTS.titles.length)]
+          likes: window.utils.getRandomValue(LIKES_QUANTITY.min, LIKES_QUANTITY.max),
+          comments: getRandomComments(window.utils.getRandomValue(1, COMMENTS.max)),
+          title: COMMENTS.titles[window.utils.getRandomValue(0, COMMENTS.titles.length)]
         };
       }
       return array;
