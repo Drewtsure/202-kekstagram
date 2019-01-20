@@ -24,6 +24,6 @@
   };
 
   // Загрузка, наполнение и добавление на страницу фотографий пользователей
-  window.download(fillPhotosFragment, window.utils.showDownloadError);
+  window.backend.download(fillPhotosFragment, window.errorMessage.show);
 
 })();
