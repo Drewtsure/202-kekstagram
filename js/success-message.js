@@ -17,9 +17,17 @@
       var onSuccessButtonClick = function () {
         pageContent.removeChild(success);
         successButtons[0].removeEventListener('click', onSuccessButtonClick);
+        document.removeEventListener('keydown', onDocumentKeyPress);
+      };
+
+      var onDocumentKeyPress = function (evt) {
+        if (window.utils.isKeyEsc(evt)) {
+          onSuccessButtonClick();
+        }
       };
 
       successButtons[0].addEventListener('click', onSuccessButtonClick);
+      document.addEventListener('keydown', onDocumentKeyPress);
     }
   };
 })();

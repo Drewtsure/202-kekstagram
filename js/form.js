@@ -1,10 +1,6 @@
 'use strict';
 
 (function () {
-  var KeyCodes = {
-    ESC: 27
-  };
-
   var Effect = {
     ORIGIN: {
       id: 'effect-none',
@@ -91,6 +87,7 @@
 
     uploadCloseButton.addEventListener('click', onClosePhotoClick);
     document.addEventListener('keydown', onDocumentKeydown);
+    form.addEventListener('submit', onFormSubmit);
   };
 
   var onClosePhotoClick = function () {
@@ -102,7 +99,7 @@
   };
 
   var onDocumentKeydown = function (evt) {
-    if (evt.keyCode === KeyCodes.ESC && evt.target !== textDescription) {
+    if (window.utils.isKeyEsc(evt) && evt.target !== textDescription) {
       onClosePhotoClick();
     }
   };
@@ -116,7 +113,6 @@
   };
 
   uploadFileInput.addEventListener('change', onNewPhotoUploadChange);
-  form.addEventListener('submit', onFormSubmit);
 
   // Переключение эффектов
   var effectsRadioList = uploadedImageOverlay.querySelectorAll('.effects__radio');
