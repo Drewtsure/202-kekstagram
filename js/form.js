@@ -1,10 +1,6 @@
 'use strict';
 
 (function () {
-  var KeyCodes = {
-    ESC: 27
-  };
-
   var Effect = {
     ORIGIN: {
       id: 'effect-none',
@@ -72,6 +68,7 @@
 
   // Открытие и закрытие окна при загрузке нового изображения
   var uploadFormWrapper = document.querySelector('.img-upload');
+  var form = uploadFormWrapper.querySelector('.img-upload__form');
   var uploadFileInput = uploadFormWrapper.querySelector('#upload-file');
   var uploadedImageOverlay = uploadFormWrapper.querySelector('.img-upload__overlay');
   var uploadCloseButton = uploadedImageOverlay.querySelector('.img-upload__cancel');
@@ -90,6 +87,7 @@
 
     uploadCloseButton.addEventListener('click', onClosePhotoClick);
     document.addEventListener('keydown', onDocumentKeydown);
+    form.addEventListener('submit', onFormSubmit);
   };
 
   var onClosePhotoClick = function () {
@@ -97,12 +95,21 @@
 
     uploadCloseButton.removeEventListener('click', onClosePhotoClick);
     document.removeEventListener('keydown', onDocumentKeydown);
+    form.removeEventListener('submit', onFormSubmit);
   };
 
   var onDocumentKeydown = function (evt) {
-    if (evt.keyCode === KeyCodes.ESC && evt.target !== textDescription) {
+    if (window.utils.isKeyEsc(evt) && evt.target !== textDescription) {
       onClosePhotoClick();
     }
+  };
+
+  var onFormSubmit = function (evt) {
+    window.backend.upload(new FormData(form), function (response) {
+      window.form.resetUploadForm(uploadedImageOverlay, uploadFileInput);
+      window.successMessage.show(response);
+    }, window.errorMessage.show);
+    evt.preventDefault();
   };
 
   uploadFileInput.addEventListener('change', onNewPhotoUploadChange);
@@ -246,15 +253,6 @@
   biggerScaleButton.addEventListener('click', function () {
     var scaleInt = parseInt(scaleValueInput.value, 10);
     return scaleInt <= (ScaleValue.MAX - ScaleValue.STEP) ? setScale(scaleInt + ScaleValue.STEP) : setScale(scaleInt);
-  });
-
-  var form = uploadFormWrapper.querySelector('.img-upload__form');
-  form.addEventListener('submit', function (evt) {
-    window.upload(new FormData(form), function (response) {
-      window.form.resetUploadForm(uploadedImageOverlay, uploadFileInput);
-      window.utils.showSuccess(response);
-    }, window.utils.showUploadError);
-    evt.preventDefault();
   });
 
   window.form = {
