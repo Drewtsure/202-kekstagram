@@ -73,6 +73,7 @@
   var uploadedImageOverlay = uploadFormWrapper.querySelector('.img-upload__overlay');
   var uploadCloseButton = uploadedImageOverlay.querySelector('.img-upload__cancel');
   var textDescription = uploadedImageOverlay.querySelector('.text__description');
+  var hashtagInput = uploadFormWrapper.querySelector('.text__hashtags');
 
   var resetUploadForm = function () {
     uploadedImageOverlay.classList.add('hidden');
@@ -104,11 +105,50 @@
     }
   };
 
+  var validateHashTags = function () {
+    var hashtags = hashtagInput.value.split(' ');
+
+    var validationError = false;
+    var noHashtag = false;
+    var onlyHashtag = false;
+
+    var customMessage = '';
+
+    hashtags.forEach(function (element) {
+      if (element.split()[0] !== '#') {
+        noHashtag = true;
+      }
+      if (element.length <= 1) {
+        onlyHashtag = true;
+      }
+    });
+
+    validationError = noHashtag || onlyHashtag;
+
+    if (noHashtag) {
+      customMessage += 'Все хештеги должны начинаться с символа #. ';
+    }
+
+    if (onlyHashtag) {
+      customMessage += 'Хештег не может состоять из одного символа или только из символа #. ';
+    }
+
+    if (validationError) {
+      hashtagInput.setCustomValidity(customMessage);
+    } else {
+      hashtagInput.setCustomValidity = '';
+    }
+
+    return validationError;
+  };
+
   var onFormSubmit = function (evt) {
-    window.backend.upload(new FormData(form), function (response) {
-      window.form.resetUploadForm(uploadedImageOverlay, uploadFileInput);
-      window.successMessage.show(response);
-    }, window.errorMessage.show);
+    if (!validateHashTags()) {
+      window.backend.upload(new FormData(form), function (response) {
+        window.form.resetUploadForm(uploadedImageOverlay, uploadFileInput);
+        window.successMessage.show(response);
+      }, window.errorMessage.show);
+    }
     evt.preventDefault();
   };
 
