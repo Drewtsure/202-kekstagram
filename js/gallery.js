@@ -15,10 +15,10 @@
     bodyPage.classList.remove('modal-open');
 
     bigPhotoClose.removeEventListener('click', onBigPhotoCloseClick);
-    document.removeEventListener('keydown', onDocumentKeydown);
+    document.removeEventListener('keydown', onDocumentKeyPress);
   };
 
-  var onDocumentKeydown = function (evt) {
+  var onDocumentKeyPress = function (evt) {
     if (window.utils.isKeyEsc(evt)) {
       onBigPhotoCloseClick(evt);
     }
@@ -43,7 +43,7 @@
         bodyPage.classList.add('modal-open');
 
         bigPhotoClose.addEventListener('click', onBigPhotoCloseClick);
-        document.addEventListener('keydown', onDocumentKeydown);
+        document.addEventListener('keydown', onDocumentKeyPress);
       });
     });
 

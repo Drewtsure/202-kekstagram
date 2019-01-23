@@ -64,11 +64,14 @@
     STEP: 25
   };
 
+  var PIN_MOVING_STEP = 10;
+
   var TEXTAREA_MAX = '140';
 
   // Открытие и закрытие окна при загрузке нового изображения
   var uploadFormWrapper = document.querySelector('.img-upload');
   var form = uploadFormWrapper.querySelector('.img-upload__form');
+  var formSubmit = form.querySelector('.img-upload__submit');
   var uploadFileInput = uploadFormWrapper.querySelector('#upload-file');
   var uploadedImageOverlay = uploadFormWrapper.querySelector('.img-upload__overlay');
   var uploadCloseButton = uploadedImageOverlay.querySelector('.img-upload__cancel');
@@ -78,6 +81,10 @@
   var resetUploadForm = function () {
     uploadedImageOverlay.classList.add('hidden');
     uploadFileInput.value = '';
+    hashtagInput.value = '';
+    textDescription.value = '';
+    hashtagInput.style.borderColor = ('#fff');
+    hashtagInput.style.boxShadow = ('inset 0 0 0 #fff');
   };
 
   var onNewPhotoUploadChange = function () {
@@ -87,68 +94,42 @@
     uploadedImageOverlay.querySelector('input[id=' + Effect.ORIGIN.id + ']').checked = true;
 
     uploadCloseButton.addEventListener('click', onClosePhotoClick);
-    document.addEventListener('keydown', onDocumentKeydown);
+    document.addEventListener('keydown', onDocumentKeyPress);
     form.addEventListener('submit', onFormSubmit);
+    formSubmit.addEventListener('click', onFormSubmitClick);
+    hashtagInput.addEventListener('input', onHashtagInput);
   };
 
   var onClosePhotoClick = function () {
     resetUploadForm();
 
     uploadCloseButton.removeEventListener('click', onClosePhotoClick);
-    document.removeEventListener('keydown', onDocumentKeydown);
+    document.removeEventListener('keydown', onDocumentKeyPress);
     form.removeEventListener('submit', onFormSubmit);
+    formSubmit.removeEventListener('click', onFormSubmitClick);
+    hashtagInput.removeEventListener('input', onHashtagInput);
   };
 
-  var onDocumentKeydown = function (evt) {
-    if (window.utils.isKeyEsc(evt) && evt.target !== textDescription) {
+  var onDocumentKeyPress = function (evt) {
+    if (window.utils.isKeyEsc(evt) && evt.target !== textDescription && evt.target !== hashtagInput) {
       onClosePhotoClick();
     }
   };
 
-  var validateHashTags = function () {
-    var hashtags = hashtagInput.value.split(' ');
+  var onFormSubmitClick = function () {
+    window.hashtags.validate(hashtagInput);
+  };
 
-    var validationError = false;
-    var noHashtag = false;
-    var onlyHashtag = false;
-
-    var customMessage = '';
-
-    hashtags.forEach(function (element) {
-      if (element.split()[0] !== '#') {
-        noHashtag = true;
-      }
-      if (element.length <= 1) {
-        onlyHashtag = true;
-      }
-    });
-
-    validationError = noHashtag || onlyHashtag;
-
-    if (noHashtag) {
-      customMessage += 'Все хештеги должны начинаться с символа #. ';
-    }
-
-    if (onlyHashtag) {
-      customMessage += 'Хештег не может состоять из одного символа или только из символа #. ';
-    }
-
-    if (validationError) {
-      hashtagInput.setCustomValidity(customMessage);
-    } else {
-      hashtagInput.setCustomValidity = '';
-    }
-
-    return validationError;
+  var onHashtagInput = function () {
+    hashtagInput.setCustomValidity('');
   };
 
   var onFormSubmit = function (evt) {
-    if (!validateHashTags()) {
-      window.backend.upload(new FormData(form), function (response) {
-        window.form.resetUploadForm(uploadedImageOverlay, uploadFileInput);
-        window.successMessage.show(response);
-      }, window.errorMessage.show);
-    }
+    onFormSubmitClick();
+    window.backend.upload(new FormData(form), function (response) {
+      window.form.resetUploadForm(uploadedImageOverlay, uploadFileInput);
+      window.successMessage.show(response);
+    }, window.errorMessage.show);
     evt.preventDefault();
   };
 
@@ -264,6 +245,23 @@
 
     document.addEventListener('mousemove', onPinMouseMove);
     document.addEventListener('mouseup', onPinMouseUp);
+  });
+
+  effectLevelPin.addEventListener('keydown', function (evt) {
+    var pinStartIndent = effectLevelPin.getBoundingClientRect().left + (effectLevelPin.getBoundingClientRect().right - effectLevelPin.getBoundingClientRect().left) / 2;
+    var effectLevelLineRect = effectLevelLine.getBoundingClientRect();
+    var pinIndent;
+
+    switch (evt.keyCode) {
+      case 37:
+        pinIndent = (pinStartIndent - PIN_MOVING_STEP - effectLevelLineRect.left) / effectLevelLine.offsetWidth * EffectLevel.MAX;
+        checkMovedPin(effectType, pinIndent);
+        break;
+      case 39:
+        pinIndent = (pinStartIndent + PIN_MOVING_STEP - effectLevelLineRect.left) / effectLevelLine.offsetWidth * EffectLevel.MAX;
+        checkMovedPin(effectType, pinIndent);
+        break;
+    }
   });
 
   // Обработка события клика по полосе эффекта
