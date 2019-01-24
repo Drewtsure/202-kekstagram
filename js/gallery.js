@@ -5,7 +5,7 @@
   var photosWrapper = document.querySelector('.pictures');
   var bigPhoto = document.querySelector('.big-picture');
   var bigPhotoClose = bigPhoto.querySelector('.big-picture__cancel');
-  var filters = document.querySelector('.img-filters');
+  var filterBlock = document.querySelector('.img-filters');
 
   var downloadedPhotos;
 
@@ -50,10 +50,10 @@
     photosWrapper.appendChild(photosFragment);
   };
 
-  var processDownloadedPhotos = function (photos) {
+  var showPhotosAndFilter = function (photos) {
     // Показ загруженных изображений и блока с фильтрами
     fillPhotosWrapper(photos);
-    filters.classList.remove('img-filters--inactive');
+    filterBlock.classList.remove('img-filters--inactive');
 
     // Полная копия массива с загруженными фотографиями
     downloadedPhotos = photos.slice();
@@ -61,12 +61,12 @@
   };
 
   // Загрузка, наполнение и добавление на страницу фотографий пользователей
-  window.backend.download(processDownloadedPhotos, window.errorMessage.show);
+  window.backend.download(showPhotosAndFilter, window.errorMessage.show);
 
   // Очистка фотографий на странице
   var clearPhotos = function () {
-    var photosOnPage = photosWrapper.querySelectorAll('.picture');
-    photosOnPage.forEach(function (element) {
+    var photos = photosWrapper.querySelectorAll('.picture');
+    photos.forEach(function (element) {
       photosWrapper.removeChild(element);
     });
   };

@@ -7,16 +7,16 @@
   window.successMessage = {
     show: function (successData) {
       var success = successTemplate.cloneNode(true);
-      var successButtons = success.querySelectorAll('button');
+      var successButton = success.querySelector('.success__button');
 
       var responseFromServer = document.createElement('p');
       responseFromServer.textContent = 'Загружен файл: ' + successData.filename.filename;
-      success.querySelector('.success__inner').insertBefore(responseFromServer, successButtons[0]);
+      success.querySelector('.success__inner').insertBefore(responseFromServer, successButton);
       pageContent.appendChild(success);
 
       var onSuccessButtonClick = function () {
         pageContent.removeChild(success);
-        successButtons[0].removeEventListener('click', onSuccessButtonClick);
+        successButton.removeEventListener('click', onSuccessButtonClick);
         document.removeEventListener('keydown', onDocumentKeyPress);
         document.removeEventListener('click', onDocumentClick);
       };
@@ -33,7 +33,7 @@
         }
       };
 
-      successButtons[0].addEventListener('click', onSuccessButtonClick);
+      successButton.addEventListener('click', onSuccessButtonClick);
       document.addEventListener('keydown', onDocumentKeyPress);
       document.addEventListener('click', onDocumentClick);
     }
