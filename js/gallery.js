@@ -2,12 +2,10 @@
 
 (function () {
   var bodyPage = document.querySelector('body');
-  var photosWrapper = document.querySelector('.pictures');
-  var bigPhoto = document.querySelector('.big-picture');
+  var photosWrapper = bodyPage.querySelector('.pictures');
+  var bigPhoto = bodyPage.querySelector('.big-picture');
   var bigPhotoClose = bigPhoto.querySelector('.big-picture__cancel');
-  var filterBlock = document.querySelector('.img-filters');
-
-  var downloadedPhotos;
+  var filterBlock = bodyPage.querySelector('.img-filters');
 
   var onBigPhotoCloseClick = function (evt) {
     evt.preventDefault();
@@ -56,8 +54,7 @@
     filterBlock.classList.remove('img-filters--inactive');
 
     // Полная копия массива с загруженными фотографиями
-    downloadedPhotos = photos.slice();
-    window.gallery.downloadedPhotos = downloadedPhotos;
+    window.gallery.downloadedPhotos = photos.slice();
   };
 
   // Загрузка, наполнение и добавление на страницу фотографий пользователей

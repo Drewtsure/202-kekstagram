@@ -6,7 +6,7 @@
 
   window.errorMessage = {
     show: function (errorData) {
-      window.form.resetUploadForm();
+      window.form.reset();
 
       var error = errorTemplate.cloneNode(true);
       error.querySelector('.error__title').textContent = errorData;

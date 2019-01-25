@@ -1,7 +1,7 @@
 'use strict';
 
 (function () {
-  window.httpCode = {
+  window.HttpCode = {
     ACCEPTED: 202,
     BAD_GATEWAY: 502,
     BAD_REQUEST: 400,
