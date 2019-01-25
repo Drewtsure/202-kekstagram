@@ -1,6 +1,9 @@
 'use strict';
 
 (function () {
+  var PIN_MOVING_STEP = 10;
+  var COMMENT_MAX_LENGTH = '140';
+
   var Effect = {
     ORIGIN: {
       id: 'effect-none',
@@ -64,10 +67,6 @@
     STEP: 25
   };
 
-  var PIN_MOVING_STEP = 10;
-
-  var TEXTAREA_MAX = '140';
-
   // Открытие и закрытие окна при загрузке нового изображения
   var uploadFormWrapper = document.querySelector('.img-upload');
   var form = uploadFormWrapper.querySelector('.img-upload__form');
@@ -89,7 +88,7 @@
 
   var onNewPhotoUploadChange = function () {
     uploadedImageOverlay.classList.remove('hidden');
-    textDescription.maxLength = TEXTAREA_MAX;
+    textDescription.maxLength = COMMENT_MAX_LENGTH;
     setFilterType(Effect.ORIGIN);
     uploadedImageOverlay.querySelector('input[id=' + Effect.ORIGIN.id + ']').checked = true;
 
@@ -125,12 +124,13 @@
   };
 
   var onFormSubmit = function (evt) {
+    evt.preventDefault();
+
     onFormSubmitClick();
     window.backend.upload(new FormData(form), function (response) {
-      window.form.resetUploadForm(uploadedImageOverlay, uploadFileInput);
+      window.form.reset(uploadedImageOverlay, uploadFileInput);
       window.successMessage.show(response);
     }, window.errorMessage.show);
-    evt.preventDefault();
   };
 
   uploadFileInput.addEventListener('change', onNewPhotoUploadChange);
@@ -253,11 +253,11 @@
     var pinIndent;
 
     switch (evt.keyCode) {
-      case 37:
+      case window.utils.keyCodes.LEFT:
         pinIndent = (pinStartIndent - PIN_MOVING_STEP - effectLevelLineRect.left) / effectLevelLine.offsetWidth * EffectLevel.MAX;
         checkMovedPin(effectType, pinIndent);
         break;
-      case 39:
+      case window.utils.keyCodes.RIGHT:
         pinIndent = (pinStartIndent + PIN_MOVING_STEP - effectLevelLineRect.left) / effectLevelLine.offsetWidth * EffectLevel.MAX;
         checkMovedPin(effectType, pinIndent);
         break;
@@ -294,6 +294,7 @@
   });
 
   window.form = {
-    resetUploadForm: resetUploadForm
+    // resetUploadForm: resetUploadForm
+    reset: resetUploadForm
   };
 })();

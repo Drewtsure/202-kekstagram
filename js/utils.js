@@ -2,25 +2,28 @@
 
 (function () {
   var KeyCodes = {
-    ESC: 27
+    ESC: 27,
+    LEFT: 37,
+    RIGHT: 39
   };
 
   window.utils = {
     getRandomValue: function (min, max) {
       return Math.floor(Math.random() * (max - min) + min);
     },
-    shuffleArray: function (array) {
+    shuffleArray: function (shuffledArray) {
       var temp;
-      for (var i = 0; i < array.length; i++) {
-        var j = Math.floor(window.utils.getRandomValue(i, array.length));
-        temp = array[i];
-        array[i] = array[j];
-        array[j] = temp;
-      }
-      return array;
+      shuffledArray.forEach(function (element, elementIndex, array) {
+        var newIndex = Math.floor(window.utils.getRandomValue(elementIndex, array.length));
+        temp = array[elementIndex];
+        array[elementIndex] = array[newIndex];
+        array[newIndex] = temp;
+      });
+      return shuffledArray;
     },
     isKeyEsc: function (evt) {
       return evt.keyCode === KeyCodes.ESC;
-    }
+    },
+    keyCodes: KeyCodes
   };
 })();

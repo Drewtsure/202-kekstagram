@@ -26,6 +26,12 @@
         var hashtagDublicate = false;
         var customMessage = '';
 
+        var addToCustomMessage = function (checkingStatement, text) {
+          if (checkingStatement) {
+            customMessage += text;
+          }
+        };
+
         hashtags.forEach(function (element) {
           var oneHashtag = element.split('');
 
@@ -66,35 +72,22 @@
           for (var j = i + 1; j < hashtags.length; j++) {
             if (hashtags[i].toLowerCase() === hashtags[j].toLowerCase()) {
               hashtagDublicate = true;
+              break;
             }
+          }
+          if (hashtagDublicate) {
+            break;
           }
         }
 
         // Сборка и вывод сообщения об ошибке, если хотя бы одна из них есть
         if (noHashtag || onlyOneSymbol || noSpace || tooManyHashtags || tooLongHashtag || hashtagDublicate) {
-          if (noHashtag) {
-            customMessage += CustomValidationText.NO_HASHTAG;
-          }
-
-          if (onlyOneSymbol) {
-            customMessage += CustomValidationText.ONLY_ONE_SYMBOL;
-          }
-
-          if (noSpace) {
-            customMessage += CustomValidationText.NO_SPACE;
-          }
-
-          if (tooManyHashtags) {
-            customMessage += CustomValidationText.TOO_MANY_HASHTAGS;
-          }
-
-          if (tooLongHashtag) {
-            customMessage += CustomValidationText.TOO_LONG_HASHTAG;
-          }
-
-          if (hashtagDublicate) {
-            customMessage += CustomValidationText.HASHTAG_DUBLICATE;
-          }
+          addToCustomMessage(noHashtag, CustomValidationText.NO_HASHTAG);
+          addToCustomMessage(onlyOneSymbol, CustomValidationText.ONLY_ONE_SYMBOL);
+          addToCustomMessage(noSpace, CustomValidationText.NO_SPACE);
+          addToCustomMessage(tooManyHashtags, CustomValidationText.TOO_MANY_HASHTAGS);
+          addToCustomMessage(tooLongHashtag, CustomValidationText.TOO_LONG_HASHTAG);
+          addToCustomMessage(hashtagDublicate, CustomValidationText.HASHTAG_DUBLICATE);
 
           input.setCustomValidity(customMessage);
           input.style.borderColor = ('red');
