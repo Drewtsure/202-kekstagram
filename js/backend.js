@@ -9,11 +9,6 @@
 
     xhr.responseType = 'json';
 
-    // xhr.onreadystatechange = function () {
-    //   console.log('readyState ' + xhr.readyState);
-    //   console.dir('xhr ' + xhr);
-    // };
-
     xhr.addEventListener('error', function () {
       if (xhr.status === 0) {
         onError('Отсутствует интернет-соединение');
