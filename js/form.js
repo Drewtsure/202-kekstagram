@@ -89,7 +89,7 @@
   var onNewPhotoUploadChange = function () {
     uploadedImageOverlay.classList.remove('hidden');
     textDescription.maxLength = COMMENT_MAX_LENGTH;
-    setFilterType(Effect.ORIGIN);
+    setFilterType(Effect.ORIGIN, EffectLevel.MIN);
     uploadedImageOverlay.querySelector('input[id=' + Effect.ORIGIN.id + ']').checked = true;
 
     uploadCloseButton.addEventListener('click', onClosePhotoClick);
@@ -126,7 +126,6 @@
   var onFormSubmit = function (evt) {
     evt.preventDefault();
 
-    onFormSubmitClick();
     window.backend.upload(new FormData(form), function (response) {
       window.form.reset(uploadedImageOverlay, uploadFileInput);
       window.successMessage.show(response);
@@ -148,6 +147,7 @@
   effectLevelWrapper.classList.add('visually-hidden');
 
   var effectType;
+  var effectClass;
 
   var getEffectType = function (effectName) {
     switch (effectName) {
@@ -172,20 +172,23 @@
   effectsRadioList.forEach(function (element) {
     element.addEventListener('click', function (evt) {
       effectType = getEffectType(evt.target.id);
-      return effectType.name === '' ? setFilterType(effectType) : setFilterType(effectType, EffectLevel.MAX);
+      return effectType.name === '' ? setFilterType(effectType, EffectLevel.MIN) : setFilterType(effectType, EffectLevel.MAX);
     });
   });
 
   var setFilterType = function (effect, level) {
     if (effect.name === '') {
-      imageElement.style = '';
-      imageElement.className = '';
+      imageElement.style.filter = '';
+      if (effectClass) {
+        imageElement.classList.remove(effectClass);
+      }
       effectLevelWrapper.classList.add('visually-hidden');
       setEffectLevel(effect, level);
       return;
     }
 
-    imageElement.className = effect.name;
+    effectClass = effect.name;
+    imageElement.className = effectClass;
     effectLevelWrapper.classList.remove('visually-hidden');
     setEffectLevel(effect, level);
   };
@@ -285,16 +288,17 @@
 
   smallerScaleButton.addEventListener('click', function () {
     var scaleInt = parseInt(scaleValueInput.value, 10);
-    return scaleInt >= (ScaleValue.MIN + ScaleValue.STEP) ? setScale(scaleInt - ScaleValue.STEP) : setScale(scaleInt);
+    var newScaleValue = scaleInt >= ScaleValue.MIN + ScaleValue.STEP ? scaleInt - ScaleValue.STEP : scaleInt;
+    setScale(newScaleValue);
   });
 
   biggerScaleButton.addEventListener('click', function () {
     var scaleInt = parseInt(scaleValueInput.value, 10);
-    return scaleInt <= (ScaleValue.MAX - ScaleValue.STEP) ? setScale(scaleInt + ScaleValue.STEP) : setScale(scaleInt);
+    var newScaleValue = scaleInt <= ScaleValue.MAX - ScaleValue.STEP ? scaleInt + ScaleValue.STEP : scaleInt;
+    setScale(newScaleValue);
   });
 
   window.form = {
-    // resetUploadForm: resetUploadForm
     reset: resetUploadForm
   };
 })();

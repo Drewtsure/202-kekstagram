@@ -7,16 +7,10 @@
   var filterPopular = filterBlock.querySelector('#filter-popular');
   var filterNew = filterBlock.querySelector('#filter-new');
   var filterDiscussed = filterBlock.querySelector('#filter-discussed');
-  var filterActive = filterBlock.querySelectorAll('.img-filters__button');
 
   // Переключение активного фильтра
   var setFilterActive = function (evt) {
-    // filterBlock.querySelector('.img-filters__button--active').classList.remove('img-filters__button--active');
-    for (var i = 0; i < filterActive.length; i++) {
-      if (filterActive[i].classList.contains('img-filters__button--active')) {
-        filterActive[i].classList.remove('img-filters__button--active');
-      }
-    }
+    filterBlock.querySelector('.img-filters__button--active').classList.remove('img-filters__button--active');
     evt.target.classList.add('img-filters__button--active');
   };
 

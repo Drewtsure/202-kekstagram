@@ -17,7 +17,7 @@
   window.hashtags = {
     validate: function (input) {
       if (input.value) {
-        var hashtags = input.value.split(' ');
+        var hashtags = input.value.replace(/\s\s+/g, ' ').trim().split(' ');
         var noHashtag = false;
         var onlyOneSymbol = false;
         var noSpace = false;
@@ -33,10 +33,10 @@
         };
 
         hashtags.forEach(function (element) {
-          var oneHashtag = element.split('');
+          var oneHashtagSymbols = element.split('');
 
           // Проверка, что первый символ — хештег
-          if (oneHashtag[0] !== '#') {
+          if (oneHashtagSymbols[0] !== '#') {
             noHashtag = true;
           }
 
@@ -47,7 +47,7 @@
 
           // Проверка, что все хештеги разделяются пробелами
           var hashCount = 0;
-          oneHashtag.forEach(function (symbol) {
+          oneHashtagSymbols.forEach(function (symbol) {
             if (symbol === '#') {
               hashCount++;
             }
