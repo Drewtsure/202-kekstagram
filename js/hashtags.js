@@ -4,6 +4,7 @@
   var HASHTAGS_MAX_QUATITY = 5;
   var HASHTAG_MIN_LENGTH = 1;
   var HASHTAG_MAX_LENGTH = 20;
+  var HASHTAG_SYMBOL = '#';
 
   var CustomValidationText = {
     NO_HASHTAG: 'Все хештеги должны начинаться с символа #. ',
@@ -36,7 +37,7 @@
           var oneHashtagSymbols = element.split('');
 
           // Проверка, что первый символ — хештег
-          if (oneHashtagSymbols[0] !== '#') {
+          if (oneHashtagSymbols[0] !== HASHTAG_SYMBOL) {
             noHashtag = true;
           }
 
@@ -48,7 +49,7 @@
           // Проверка, что все хештеги разделяются пробелами
           var hashCount = 0;
           oneHashtagSymbols.forEach(function (symbol) {
-            if (symbol === '#') {
+            if (symbol === HASHTAG_SYMBOL) {
               hashCount++;
             }
           });

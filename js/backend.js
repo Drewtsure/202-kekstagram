@@ -3,6 +3,7 @@
 (function () {
   var DOWNLOAD_URL = 'https://js.dump.academy/kekstagram/data';
   var UPLOAD_URL = 'https://js.dump.academy/kekstagram';
+  var XHR_TIMEOUT = 5000;
   var XhrStatus = {
     UNSENT: 0,
     OPENED: 1,
@@ -15,7 +16,7 @@
     var xhr = new XMLHttpRequest();
 
     xhr.responseType = 'json';
-    xhr.timeout = 5000;
+    xhr.timeout = XHR_TIMEOUT;
 
     xhr.addEventListener('error', function () {
       if (xhr.status === XhrStatus.UNSENT) {
