@@ -3,14 +3,22 @@
 (function () {
   var DOWNLOAD_URL = 'https://js.dump.academy/kekstagram/data';
   var UPLOAD_URL = 'https://js.dump.academy/kekstagram';
+  var XhrStatus = {
+    UNSENT: 0,
+    OPENED: 1,
+    HEADERS_RECEIVED: 2,
+    LOADING: 3,
+    DONE: 4
+  };
 
   var createAjaxRequest = function (onLoad, onError) {
     var xhr = new XMLHttpRequest();
 
     xhr.responseType = 'json';
+    xhr.timeout = 5000;
 
     xhr.addEventListener('error', function () {
-      if (xhr.status === 0) {
+      if (xhr.status === XhrStatus.UNSENT) {
         onError('Отсутствует интернет-соединение');
         return;
       }

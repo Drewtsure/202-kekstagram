@@ -206,20 +206,20 @@
 
   var checkMovedPin = function (effect, level) {
     if (level > EffectLevel.MIN && level < EffectLevel.MAX) {
-      setEffectLevel(effectType, level);
+      setEffectLevel(effect, level);
       return;
     }
 
     // Установка крайних положений при выходе за границы полосы фильтра
     switch (level < EffectLevel.MID) {
       case true:
-        setEffectLevel(effectType, EffectLevel.MIN);
+        setEffectLevel(effect, EffectLevel.MIN);
         break;
       case false:
-        setEffectLevel(effectType, EffectLevel.MAX);
+        setEffectLevel(effect, EffectLevel.MAX);
         break;
       default:
-        setEffectLevel(effectType, EffectLevel.MAX);
+        setEffectLevel(effect, EffectLevel.MAX);
     }
   };
 
